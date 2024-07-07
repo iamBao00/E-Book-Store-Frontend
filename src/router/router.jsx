@@ -10,6 +10,7 @@ import Dashboard from "../dashboard/Dashboard";
 import UploadBook from "../dashboard/UploadBook";
 import ManageBook from "../dashboard/ManageBook";
 import EditBook from "../dashboard/EditBook";
+import SignUp from "../components/SignUp";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
           fetch(`http://localhost:3000/book/getById/${params.id}`),
       },
     ],
+  },
+  {
+    path: "sign-up",
+    element: <SignUp />,
   },
 ]);
 
