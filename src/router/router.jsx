@@ -11,6 +11,8 @@ import UploadBook from "../dashboard/UploadBook";
 import ManageBook from "../dashboard/ManageBook";
 import EditBook from "../dashboard/EditBook";
 import SignUp from "../components/SignUp";
+import SignIn from "../components/SignIn";
+import { User } from "../user/User";
 
 const router = createBrowserRouter([
   {
@@ -66,8 +68,16 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "sign-up",
+    path: "/sign-up",
     element: <SignUp />,
+  },
+  {
+    path: "/login",
+    element: <SignIn />,
+  },
+  {
+    path: "/user",
+    element: <User />,
   },
 ]);
 

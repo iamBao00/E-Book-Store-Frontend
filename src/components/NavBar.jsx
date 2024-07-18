@@ -36,6 +36,8 @@ const NavBar = () => {
     { link: "Shop", path: "/shop" },
     { link: "Admin", path: "/admin/dashboard" },
     { link: "Blog", path: "/blog" },
+    { link: "Sign-in", path: "/login" },
+    { link: "My-Info", path: "/user" },
   ];
   return (
     <header className="w-full bg-transparent fixed top-0 left-0 right-0 transition-all ease-in duration-300">
@@ -67,12 +69,12 @@ const NavBar = () => {
             ))}
           </ul>
 
-          {/*btn for lagre devices*/}
+          {/* btn for lagre devices
           <div className="space-x-12 hidden lg:flex items-center">
             <button>
               <FaBarsStaggered className="w-5 hover:text-blue-700" />
             </button>
-          </div>
+          </div> */}
 
           {/*menu button for mobile devices */}
           <div className="md:hidden">
