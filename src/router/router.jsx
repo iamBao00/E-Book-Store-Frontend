@@ -6,13 +6,14 @@ import About from "../components/About";
 import Blog from "../components/Blog";
 import SingleBook from "../shop/SingleBook";
 import DashboardLayout from "../dashboard/DashboardLayout";
-import Dashboard from "../dashboard/Dashboard";
+import ManageCategory from "../dashboard/ManageCategory";
 import UploadBook from "../dashboard/UploadBook";
 import ManageBook from "../dashboard/ManageBook";
 import EditBook from "../dashboard/EditBook";
 import SignUp from "../components/SignUp";
 import SignIn from "../components/SignIn";
 import { User } from "../user/User";
+import PrivateRoute from "../dashboard/PrivateRoute";
 
 const router = createBrowserRouter([
   {
@@ -45,18 +46,22 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       {
-        path: "/admin/dashboard",
-        element: <Dashboard />,
+        path: "/admin/dashboard/category",
+        element: <ManageCategory />,
       },
       {
         path: "/admin/dashboard/upload",
         element: <UploadBook />,
       },
       {
-        path: "/admin/dashboard/manage",
+        path: "/admin/dashboard",
         element: <ManageBook />,
       },
       {

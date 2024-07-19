@@ -31,6 +31,8 @@ const SignIn = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Login successful", data);
+        // Lưu thông tin người dùng vào localStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
         // Xử lý sau khi đăng nhập thành công
         if (data.user.role === "user") window.location.href = "/";
         else if (data.user.role === "admin")

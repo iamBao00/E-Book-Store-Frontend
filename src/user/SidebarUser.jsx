@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar } from "flowbite-react";
 import {
-  HiChartPie,
   HiInbox,
   HiOutlineCloudUpload,
   HiShoppingBag,
@@ -38,23 +37,17 @@ const SideBar = () => {
 
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item
-            href="/admin/dashboard/upload"
-            icon={HiOutlineCloudUpload}
-          >
-            Upload Book
-          </Sidebar.Item>
-          <Sidebar.Item href="/admin/dashboard" icon={HiInbox}>
-            Manage Book
-          </Sidebar.Item>
-          <Sidebar.Item href="/admin/dashboard/category" icon={HiChartPie}>
-            Magane Category
-          </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiUser}>
             Infomation
           </Sidebar.Item>
+          <Sidebar.Item href="#" icon={HiOutlineCloudUpload}>
+            Review History
+          </Sidebar.Item>
+          <Sidebar.Item href="#" icon={HiInbox}>
+            Manage Cart
+          </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiShoppingBag}>
-            Manage Order
+            Order History
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiTable} onClick={handleLogout}>
             Log out

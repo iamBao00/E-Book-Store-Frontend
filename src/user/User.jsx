@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
+import SideBarUser from "./SidebarUser";
 
 export const User = () => {
   const [error, setError] = useState(null);
@@ -31,10 +33,9 @@ export const User = () => {
   }, []);
 
   return (
-    <div>
-      <h1>User</h1>
-      {error && <p>{error}</p>}
-      {/* Render nội dung khác cho người dùng đã đăng nhập */}
+    <div className="flex gap-4 flex-col md:flex-row">
+      <SideBarUser />
+      <Outlet />
     </div>
   );
 };
