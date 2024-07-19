@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const SignIn = () => {
   const [error, setError] = useState(""); // State để lưu thông báo lỗi
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorMessage = params.get("error");
+    if (errorMessage) {
+      setError(errorMessage);
+    }
+  }, []);
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -24,7 +32,9 @@ const SignIn = () => {
         const data = await response.json();
         console.log("Login successful", data);
         // Xử lý sau khi đăng nhập thành công
-        window.location.href = "/";
+        if (data.user.role === "user") window.location.href = "/";
+        else if (data.user.role === "admin")
+          window.location.href = "/admin/dashboard";
       } else {
         const errorData = await response.json();
         console.error("Login failed", errorData);
