@@ -6,71 +6,75 @@ const ManageCart = () => {
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/users/cart", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Send cookies with the request
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setCartItems(data);
-          // Fetch book details for each cart item
-          fetchBooks(data);
-        } else {
-          console.error("Failed to fetch cart items:", data.message);
-        }
-      } catch (err) {
-        console.error("Failed to fetch cart items:", err);
-      }
-    };
-
-    const fetchBooks = async (cartItems) => {
-      try {
-        const bookRequests = cartItems.map((item) =>
-          fetch(`http://localhost:3000/book/getById/${item.book_id}`).then(
-            (response) => response.json()
-          )
-        );
-        const books = await Promise.all(bookRequests);
-        const bookMap = books.reduce((acc, book) => {
-          acc[book._id] = book;
-          return acc;
-        }, {});
-        setBooks(bookMap);
-        calculateTotalAmount(cartItems, bookMap);
-      } catch (err) {
-        console.error("Failed to fetch books:", err);
-      }
-    };
-
-    const calculateTotalAmount = (cartItems, books) => {
-      const total = cartItems.reduce((acc, item) => {
-        const book = books[item.book_id];
-        return acc + (book ? book.price * item.quantity : 0);
-      }, 0);
-      setTotalAmount(total);
-    };
-
     fetchCartItems();
   }, []);
 
-  const handleRemoveItem = async (id) => {
+  const fetchCartItems = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/users/cart/${id}`, {
-        method: "DELETE",
+      const response = await fetch("http://localhost:3000/users/cart", {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // Send cookies with the request
       });
+      const data = await response.json();
       if (response.ok) {
-        const updatedCartItems = cartItems.filter((item) => item._id !== id);
-        setCartItems(updatedCartItems);
-        fetchBooks(updatedCartItems);
+        setCartItems(data);
+        console.log("data from fetchCartItems:", data);
+
+        // Fetch book details for each cart item
+        fetchBooks(data);
+      } else {
+        console.error("Failed to fetch cart items:", data.message);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cart items:", err);
+    }
+  };
+
+  const fetchBooks = async (cartItems) => {
+    try {
+      const bookRequests = cartItems.map((item) =>
+        fetch(`http://localhost:3000/book/getById/${item.book_id}`).then(
+          (response) => response.json()
+        )
+      );
+      const books = await Promise.all(bookRequests);
+      const bookMap = books.reduce((acc, book) => {
+        acc[book._id] = book;
+        return acc;
+      }, {});
+      setBooks(bookMap);
+      calculateTotalAmount(cartItems, bookMap);
+    } catch (err) {
+      console.error("Failed to fetch books:", err);
+    }
+  };
+
+  const calculateTotalAmount = (cartItems, books) => {
+    const total = cartItems.reduce((acc, item) => {
+      const book = books[item.book_id];
+      return acc + (book ? book.price * item.quantity : 0);
+    }, 0);
+    setTotalAmount(total);
+  };
+
+  const handleRemoveItem = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/cart/delete/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        // Fetch updated cart items from server
+        fetchCartItems();
       } else {
         console.error("Failed to remove item:", response.statusText);
       }
@@ -81,20 +85,20 @@ const ManageCart = () => {
 
   const handleQuantityChange = async (id, newQuantity) => {
     try {
-      const response = await fetch(`http://localhost:3000/users/cart/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ quantity: newQuantity }),
-      });
+      const response = await fetch(
+        `http://localhost:3000/users/cart/quantity/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ quantity: newQuantity }),
+        }
+      );
       if (response.ok) {
-        const updatedCartItems = cartItems.map((item) =>
-          item._id === id ? { ...item, quantity: newQuantity } : item
-        );
-        setCartItems(updatedCartItems);
-        fetchBooks(updatedCartItems);
+        // Fetch updated cart items from server
+        fetchCartItems();
       } else {
         console.error("Failed to update quantity:", response.statusText);
       }
@@ -158,7 +162,7 @@ const ManageCart = () => {
                             <button
                               onClick={() =>
                                 handleQuantityChange(
-                                  item._id,
+                                  item.book_id,
                                   item.quantity - 1
                                 )
                               }
@@ -176,7 +180,7 @@ const ManageCart = () => {
                             <button
                               onClick={() =>
                                 handleQuantityChange(
-                                  item._id,
+                                  item.book_id,
                                   item.quantity + 1
                                 )
                               }
@@ -192,7 +196,7 @@ const ManageCart = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleRemoveItem(item._id)}
+                    onClick={() => handleRemoveItem(item.book_id)}
                     className="bg-red-500 text-white px-4 py-2 rounded-md"
                   >
                     Remove

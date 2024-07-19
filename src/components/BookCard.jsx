@@ -17,10 +17,9 @@ const BookCard = ({ headline, books }) => {
   console.log(books);
   return (
     <div className="my-16 px-4 lg:px-24">
-      <h2 className="text-7x1 text-center font-bold text-black my-5">
+      <h2 className="text-4xl text-center font-bold text-black my-5">
         {headline}
       </h2>
-
       {/*Card */}
       <div className="mt-12">
         <Swiper
@@ -58,10 +57,7 @@ const BookCard = ({ headline, books }) => {
                 <div>
                   <div>
                     <h3>{book.title}</h3>
-                    <p>{book.author}</p>
-                  </div>
-                  <div>
-                    <p>{book.price}</p>
+                    <p>by {book.author}</p>
                   </div>
                 </div>
               </Link>
