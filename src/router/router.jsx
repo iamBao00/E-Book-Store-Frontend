@@ -14,6 +14,7 @@ import SignUp from "../components/SignUp";
 import SignIn from "../components/SignIn";
 import { User } from "../user/User";
 import PrivateRoute from "../dashboard/PrivateRoute";
+import ManageCart from "../user/ManageCart";
 
 const router = createBrowserRouter([
   {
@@ -83,6 +84,12 @@ const router = createBrowserRouter([
   {
     path: "/user",
     element: <User />,
+    children: [
+      {
+        path: "/user/manage-cart",
+        element: <ManageCart />,
+      },
+    ],
   },
 ]);
 

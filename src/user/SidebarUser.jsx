@@ -43,7 +43,7 @@ const SideBar = () => {
           <Sidebar.Item href="#" icon={HiOutlineCloudUpload}>
             Review History
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiInbox}>
+          <Sidebar.Item href="/user/manage-cart" icon={HiInbox}>
             Manage Cart
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiShoppingBag}>
