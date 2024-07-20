@@ -53,7 +53,7 @@ const SideBar = () => {
           <Sidebar.Item href="#" icon={HiUser}>
             Infomation
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiShoppingBag}>
+          <Sidebar.Item href="/admin/dashboard/order" icon={HiShoppingBag}>
             Manage Order
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiTable} onClick={handleLogout}>

@@ -17,6 +17,7 @@ import PrivateRoute from "../dashboard/PrivateRoute";
 import ManageCart from "../user/ManageCart";
 import PaymentPage from "../user/PaymentPage";
 import OrderHistory from "../user/OrderHistory";
+import ManageOrder from "../dashboard/ManageOrder";
 
 const router = createBrowserRouter([
   {
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
         element: <EditBook />,
         loader: ({ params }) =>
           fetch(`http://localhost:3000/book/getById/${params.id}`),
+      },
+      {
+        path: "/admin/dashboard/order",
+        element: <ManageOrder />,
       },
     ],
   },
