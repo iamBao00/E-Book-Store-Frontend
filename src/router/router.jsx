@@ -15,6 +15,8 @@ import SignIn from "../components/SignIn";
 import { User } from "../user/User";
 import PrivateRoute from "../dashboard/PrivateRoute";
 import ManageCart from "../user/ManageCart";
+import PaymentPage from "../user/PaymentPage";
+import OrderHistory from "../user/OrderHistory";
 
 const router = createBrowserRouter([
   {
@@ -89,6 +91,9 @@ const router = createBrowserRouter([
         path: "/user/manage-cart",
         element: <ManageCart />,
       },
+      { path: "/user/payment", element: <PaymentPage /> },
+
+      { path: "/user/order-history", element: <OrderHistory /> },
     ],
   },
 ]);

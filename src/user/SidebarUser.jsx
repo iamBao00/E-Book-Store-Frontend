@@ -7,6 +7,7 @@ import {
   HiTable,
   HiUser,
 } from "react-icons/hi";
+import { FaHistory } from "react-icons/fa";
 import userImg from "../assets/profile.jpg";
 
 const SideBar = () => {
@@ -46,8 +47,11 @@ const SideBar = () => {
           <Sidebar.Item href="/user/manage-cart" icon={HiInbox}>
             Manage Cart
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiShoppingBag}>
+          <Sidebar.Item href="/user/order-history" icon={FaHistory}>
             Order History
+          </Sidebar.Item>
+          <Sidebar.Item href="/shop" icon={HiShoppingBag}>
+            Back to Shop
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiTable} onClick={handleLogout}>
             Log out

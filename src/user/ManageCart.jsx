@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ManageCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [books, setBooks] = useState({}); // To store book details
   const [totalAmount, setTotalAmount] = useState(0);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     fetchCartItems();
@@ -107,27 +109,13 @@ const ManageCart = () => {
     }
   };
 
-  const handleOrder = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ cartItems }),
-      });
-      if (response.ok) {
-        console.log("Order placed successfully");
-        setCartItems([]);
-        setBooks({});
-        setTotalAmount(0);
-      } else {
-        console.error("Failed to place order:", response.statusText);
-      }
-    } catch (err) {
-      console.error("Failed to place order:", err);
-    }
+  const handleOrder = () => {
+    navigate("/user/payment", {
+      state: {
+        cartItems,
+        totalAmount,
+      },
+    });
   };
 
   return (
