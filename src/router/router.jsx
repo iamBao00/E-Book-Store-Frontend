@@ -18,6 +18,7 @@ import ManageCart from "../user/ManageCart";
 import PaymentPage from "../user/PaymentPage";
 import OrderHistory from "../user/OrderHistory";
 import ManageOrder from "../dashboard/ManageOrder";
+import UserInfo from "../user/UserInfo";
 
 const router = createBrowserRouter([
   {
@@ -99,6 +100,19 @@ const router = createBrowserRouter([
       { path: "/user/payment", element: <PaymentPage /> },
 
       { path: "/user/order-history", element: <OrderHistory /> },
+
+      {
+        path: "/user/info/:id",
+        element: <UserInfo />,
+        // loader: ({ params }) =>
+        //   fetch(`http://localhost:3000/users/info/${params.id}`, {
+        //     method: "GET",
+        //     headers: {
+        //       "Content-type": "application/json",
+        //     },
+        //     credentials: "include",
+        //   }),
+      },
     ],
   },
 ]);

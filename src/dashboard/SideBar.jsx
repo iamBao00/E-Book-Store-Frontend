@@ -20,11 +20,29 @@ const SideBar = () => {
     }
   }, []);
 
-  const handleLogout = () => {
-    // Xóa thông tin người dùng khỏi localStorage
-    localStorage.removeItem("user");
-    // Chuyển hướng đến trang đăng nhập
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // This ensures cookies are included in the request
+      });
+
+      if (response.ok) {
+        // Clear any client-side state or cookies as needed
+        console.log("Logged out successfully");
+        // Xóa thông tin người dùng khỏi localStorage
+        localStorage.removeItem("user");
+        // Chuyển hướng đến trang đăng nhập
+        window.location.href = "/login";
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (

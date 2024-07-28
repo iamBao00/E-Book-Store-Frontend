@@ -129,7 +129,7 @@ const OrderHistory = () => {
                 {renderStatusInfo(order.status)}
               </div>
               <p>Amount: ${order.amount.toFixed(2)}</p>
-              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
+              <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
               <div className="mt-2">
                 {order.status === "Processing" && (
                   <button

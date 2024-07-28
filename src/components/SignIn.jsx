@@ -25,7 +25,7 @@ const SignIn = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
-        credentials: "include", // Đảm bảo cookie được gửi cùng yêu cầu
+        credentials: "include",
       });
 
       if (response.ok) {
