@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { PayPalButton } from "react-paypal-button-v2";
 
 const PaymentPage = () => {
   const [addresses, setAddresses] = useState([]);
@@ -14,8 +15,8 @@ const PaymentPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [books, setBooks] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
+  const [sdkReady, setSdkReady] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     fetchAddresses();
@@ -108,7 +109,7 @@ const PaymentPage = () => {
       });
       if (response.ok) {
         alert("Order placed successfully");
-        navigate("/");
+        navigate("/user/manage-cart");
       } else {
         console.error("Failed to place order:", response.statusText);
       }
@@ -125,6 +126,37 @@ const PaymentPage = () => {
       newAddress.street
     );
   };
+
+  const addPaypalScript = async () => {
+    const response = await fetch("http://localhost:3000/order/config", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    const clientID = data.data;
+    if (response.ok) {
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientID}`;
+      script.async = true;
+      script.onload = () => {
+        setSdkReady(true);
+      };
+      document.body.appendChild(script);
+    } else {
+      console.log("Failed to get Client ID");
+    }
+  };
+
+  useEffect(() => {
+    if (!window.paypal) {
+      addPaypalScript();
+    } else {
+      setSdkReady(true);
+    }
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
@@ -203,17 +235,17 @@ const PaymentPage = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="mr-2"
             />
-            Cash
+            COD
           </label>
           <label className="ml-4">
             <input
               type="radio"
-              value="momo"
-              checked={paymentMethod === "momo"}
+              value="paypal"
+              checked={paymentMethod === "paypal"}
               onChange={(e) => setPaymentMethod(e.target.value)}
               className="mr-2"
             />
-            MoMo
+            Paypal
           </label>
         </div>
       </div>
@@ -236,26 +268,46 @@ const PaymentPage = () => {
                     />
                     <div>
                       <h3 className="text-lg font-semibold">{book.title}</h3>
-                      <p>
-                        ${book.price} x {item.quantity}
+                      <p className="text-gray-600">Quantity: {item.quantity}</p>
+                      <p className="text-gray-800 font-semibold">
+                        Price: ${book.price}
                       </p>
                     </div>
                   </>
                 ) : (
-                  <span>Loading book details...</span>
+                  <p>Loading...</p>
                 )}
               </li>
             );
           })}
         </ul>
-        <div className="font-bold mt-4">Total: ${totalAmount.toFixed(2)}</div>
       </div>
-      <button
-        onClick={handlePlaceOrder}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-      >
-        Place Order
-      </button>
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold mb-2">Total Amount</h2>
+        <p className="text-2xl font-bold">${totalAmount.toFixed(2)}</p>
+      </div>
+      {!selectedAddress && !isNewAddressValid() && (
+        <p className="text-red-500">
+          Please select a valid address before place an order.
+        </p>
+      )}
+      {sdkReady && paymentMethod === "paypal" && (
+        <PayPalButton
+          amount={totalAmount}
+          onSuccess={(details, data) => handlePlaceOrder(details, data)}
+          onError={() => {
+            alert("Error happen while processing payment with Paypal");
+          }}
+        />
+      )}
+      {paymentMethod === "cash" && (
+        <button
+          onClick={handlePlaceOrder}
+          className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+        >
+          Place Order
+        </button>
+      )}
     </div>
   );
 };

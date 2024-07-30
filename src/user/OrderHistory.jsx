@@ -117,32 +117,48 @@ const OrderHistory = () => {
       {orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (
-        <ul>
+        <ul className="space-y-4">
           {orders.map((order) => (
             <li
               key={order._id}
-              className="mb-4 border p-4 rounded shadow-md cursor-pointer hover:bg-gray-100 transition"
+              className="border p-4 rounded shadow-md cursor-pointer hover:bg-gray-100 transition"
               onClick={() => handleOrderClick(order)}
             >
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Order</h2>
                 {renderStatusInfo(order.status)}
               </div>
-              <p>Amount: ${order.amount.toFixed(2)}</p>
-              <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-              <div className="mt-2">
-                {order.status === "Processing" && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-semibold">Amount:</p>
+                  <p>${order.amount.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Date:</p>
+                  <p>{new Date(order.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Payment Method:</p>
+                  <p>{order.paymentMethod}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Paid:</p>
+                  <p>{order.isPaid ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              {order.status === "Processing" && (
+                <div className="mt-4">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleCancelOrder(order._id);
                     }}
-                    className="bg-red-500 text-white py-2 px-4 rounded"
+                    className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition"
                   >
                     Cancel Order
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -169,7 +185,7 @@ const OrderHistory = () => {
             </p>
             <p>
               <strong>Date:</strong>{" "}
-              {new Date(selectedOrder.date).toLocaleDateString()}
+              {new Date(selectedOrder.createdAt).toLocaleDateString()}
             </p>
             <h3 className="text-lg font-medium mt-4">Order Details:</h3>
             <ul>
