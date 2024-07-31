@@ -119,8 +119,9 @@ const UploadBook = () => {
           <TextInput
             id="price"
             name="price"
-            type="number"
+            type="text"
             placeholder="Price"
+            pattern="^\d+(\.\d{1,2})?$"
             className="w-full"
             required
           />

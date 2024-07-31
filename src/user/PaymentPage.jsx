@@ -107,14 +107,21 @@ const PaymentPage = () => {
         credentials: "include",
         body: JSON.stringify({ paymentMethod, address: addressToSend }),
       });
+
+      const responseData = await response.json();
+
       if (response.ok) {
         alert("Order placed successfully");
         navigate("/user/manage-cart");
       } else {
-        console.error("Failed to place order:", response.statusText);
+        alert(`Failed to place order: ${responseData.message}`);
+        console.error("Failed to place order:", responseData.message);
       }
     } catch (err) {
       console.error("Failed to place order:", err);
+      alert(
+        "An error occurred while placing the order. Please try again later."
+      );
     }
   };
 

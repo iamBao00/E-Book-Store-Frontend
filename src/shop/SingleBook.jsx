@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer and toast
+import "react-toastify/dist/ReactToastify.css";
 
 const SingleBook = () => {
   const book = useLoaderData();
@@ -7,7 +9,9 @@ const SingleBook = () => {
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [editingReview, setEditingReview] = useState(false);
+  const [showPopup, setShowPopup] = useState(false); // Show/Hide popup
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -120,6 +124,43 @@ const SingleBook = () => {
     return stars;
   };
 
+  const handleAddToCart = () => {
+    setShowPopup(true);
+  };
+
+  const handleQuantityChange = (e) => {
+    setQuantity(parseInt(e.target.value, 10));
+  };
+
+  const handleConfirmAddToCart = () => {
+    fetch("http://localhost:3000/users/add-to-cart", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        bookId: book._id,
+        quantity: quantity,
+      }),
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setShowPopup(false);
+        setQuantity(1);
+        toast.success("Book added to cart successfully!"); // Show success message
+      })
+      .catch((error) => {
+        console.error("Error adding to cart:", error);
+        toast.error("Failed to add book to cart."); // Show error message
+      });
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setQuantity(1);
+  };
+
   return (
     <div className="container mx-auto p-4 lg:p-8">
       <div className="flex flex-col lg:flex-row items-center lg:items-start">
@@ -138,7 +179,10 @@ const SingleBook = () => {
             </span>
           </div>
           <p className="text-2xl text-red-500 font-bold mb-4">{book.price} $</p>
-          <button className="bg-red-500 text-white px-4 py-2 rounded">
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded"
+            onClick={handleAddToCart}
+          >
             Add to Cart
           </button>
           {currentUser && !userHasReviewed && (
@@ -229,6 +273,36 @@ const SingleBook = () => {
           <p className="text-gray-700">No reviews yet.</p>
         )}
       </div>
+      {/* Popup for selecting quantity */}
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h3 className="text-xl font-bold mb-4">Add to Cart</h3>
+            <p className="mb-4">Select quantity for {book.title}:</p>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={handleQuantityChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
+            />
+            <div className="flex justify-between">
+              <button
+                onClick={handleConfirmAddToCart}
+                className="bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={handleClosePopup}
+                className="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300 ease-in-out"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
