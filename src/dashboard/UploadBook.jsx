@@ -3,6 +3,8 @@ import { Button, Label, TextInput, Textarea, Select } from "flowbite-react";
 
 const UploadBook = () => {
   const [categories, setCategories] = useState([]);
+  const [selectedCategory, setCategory] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:3000/category/get-all")
@@ -11,12 +13,15 @@ const UploadBook = () => {
       .catch((err) => console.log(err.message));
   }, []);
 
-  const [selectedCategory, setCategory] = useState("");
   const handleChangeSelectedValue = (event) => {
     setCategory(event.target.value);
   };
 
-  const handleBookSubmit = (event) => {
+  const handleImageChange = (event) => {
+    setImageFile(event.target.files[0]);
+  };
+
+  const handleBookSubmit = async (event) => {
     event.preventDefault();
     const form = event.target;
 
@@ -27,51 +32,63 @@ const UploadBook = () => {
     const description = form.description.value;
     const stock_quantity = form.stock_quantity.value;
     const category_id = form.category_id.value;
-    const image = form.image.value;
 
-    const bookObj = {
-      title,
-      author,
-      price,
-      publisher,
-      description,
-      stock_quantity,
-      category_id,
-      image,
-    };
-    console.log(bookObj);
+    try {
+      let imageUrl = "";
 
-    // send data to DB
-    fetch("http://localhost:3000/book/add", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(bookObj),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok " + res.statusText);
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+
+        // Gửi yêu cầu tới endpoint /upload để tải ảnh lên
+        const uploadResponse = await fetch("http://localhost:3000/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
         }
-        return res.text(); // Dùng .text() thay vì .json() để đọc phản hồi như là chuỗi
-      })
-      .then((text) => {
-        try {
-          const data = JSON.parse(text); // Thử phân tích chuỗi JSON
-          console.log(`Book uploaded successfully!`);
-          console.log(data);
-          alert("Book uploaded successfully!");
-        } catch (err) {
-          console.log(`Book uploaded successfully!`);
-          console.log("text: " + text); // Nếu không phải JSON, chỉ in chuỗi phản hồi
-          alert("Book uploaded successfully!");
-        }
-        form.reset();
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-        alert("There was a problem with the upload: " + error.message);
+
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.imageUrl; // Lấy URL ảnh từ phản hồi
+      }
+
+      // Gửi thông tin sách tới endpoint /book/add
+      const bookObj = {
+        title,
+        author,
+        price,
+        publisher,
+        description,
+        stock_quantity,
+        category_id,
+        image: imageUrl, // Sử dụng URL của ảnh
+      };
+
+      const bookResponse = await fetch("http://localhost:3000/book/add", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(bookObj),
       });
+
+      if (!bookResponse.ok) {
+        throw new Error(
+          "Network response was not ok " + bookResponse.statusText
+        );
+      }
+
+      const msg = await bookResponse.json();
+      console.log("Book uploaded successfully!", msg);
+      alert("Book uploaded successfully!");
+      form.reset();
+      setImageFile(null); // Clear image file after upload
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+      alert("There was a problem with the upload: " + error.message);
+    }
   };
 
   return (
@@ -194,17 +211,18 @@ const UploadBook = () => {
           </Select>
         </div>
 
-        {/* Image URL */}
+        {/* Image Upload */}
         <div className="col-span-2">
           <div className="mb-2 block">
-            <Label htmlFor="image" value="Image URL" />
+            <Label htmlFor="image" value="Upload Image" />
           </div>
-          <TextInput
+          <input
             id="image"
             name="image"
-            type="text"
-            placeholder="URL"
+            type="file"
+            accept="image/*"
             className="w-full"
+            onChange={handleImageChange}
             required
           />
         </div>

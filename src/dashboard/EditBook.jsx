@@ -1,43 +1,57 @@
 import React, { useEffect, useState } from "react";
-import { Button, Label, TextInput, Textarea, Select } from "flowbite-react";
+import {
+  Button,
+  Label,
+  TextInput,
+  Textarea,
+  Select,
+  FileInput,
+} from "flowbite-react";
 import { useLoaderData, useParams } from "react-router-dom";
 
 const EditBook = () => {
-  const id = useParams();
-  console.log(id);
+  const { id } = useParams();
   const book = useLoaderData();
-  console.log(book);
-
   const [categories, setCategories] = useState([]);
-
-  // for update  book after updated successfully
   const [currentBook, setCurrentBook] = useState(book);
+  const [selectedCategory, setCategory] = useState("");
+  const [newImage, setNewImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(book.image);
 
   useEffect(() => {
+    // Fetch all categories
     fetch("http://localhost:3000/category/get-all")
       .then((res) => res.json())
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories(data);
+        // Set default category after fetching categories
+        if (book && book.category_id) {
+          const category = data.find((cat) => cat._id === book.category_id);
+          if (category) {
+            setCategory(category._id);
+          }
+        }
+      })
       .catch((err) => console.log(err.message));
-  }, []);
+  }, [book]);
 
-  const [selectedCategory, setCategory] = useState("");
   const handleChangeSelectedValue = (event) => {
     setCategory(event.target.value);
   };
 
-  // Set default category
-  useEffect(() => {
-    if (book && book.category_name && categories.length > 0) {
-      const category = categories.find(
-        (cat) => cat.name === book.category_name
-      );
-      if (category) {
-        setCategory(category._id);
-      }
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    setNewImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
     }
-  }, [book, categories]);
+  };
 
-  const handleBookSubmit = (event) => {
+  const handleBookSubmit = async (event) => {
     event.preventDefault();
     const form = event.target;
 
@@ -48,7 +62,25 @@ const EditBook = () => {
     const description = form.description.value;
     const stock_quantity = form.stock_quantity.value;
     const category_id = form.category_id.value;
-    const image = form.image.value;
+
+    let imageUrl = currentBook.image;
+    if (newImage) {
+      const formData = new FormData();
+      formData.append("image", newImage);
+
+      try {
+        const uploadResponse = await fetch("http://localhost:3000/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.imageUrl;
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("There was a problem with the image upload: " + error.message);
+        return;
+      }
+    }
 
     const bookObj = {
       title,
@@ -58,41 +90,34 @@ const EditBook = () => {
       description,
       stock_quantity,
       category_id,
-      image,
+      image: imageUrl,
     };
-    console.log(bookObj);
 
-    // call update API
-    fetch(`http://localhost:3000/book/update/${book._id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(bookObj),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok " + res.statusText);
+    try {
+      const response = await fetch(
+        `http://localhost:3000/book/update/${book._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(bookObj),
         }
-        return res.json(); // Chuyển đổi phản hồi thành JSON
-      })
-      .then((data) => {
-        console.log("Book updated successfully!");
-        console.log(data);
-        alert("Book updated successfully!");
-
-        // Cập nhật trạng thái currentBook
-        setCurrentBook(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem with the fetch operation:", error);
-        alert("There was a problem with the update: " + error.message);
-      });
+      );
+      const data = await response.json();
+      console.log("Book updated successfully!");
+      console.log(data);
+      alert("Book updated successfully!");
+      setCurrentBook(data);
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+      alert("There was a problem with the update: " + error.message);
+    }
   };
 
   return (
     <div className="px-4 my-12">
-      <h2 className="mb-8 text-3xl font-bold"> EDIT Book</h2>
+      <h2 className="mb-8 text-3xl font-bold">EDIT Book</h2>
       <form
         onSubmit={handleBookSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full"
@@ -205,9 +230,8 @@ const EditBook = () => {
             value={selectedCategory}
             onChange={handleChangeSelectedValue}
             required
-            defaultValue={currentBook.category_id}
           >
-            <option value=""></option>
+            <option value="">Select a category</option>
             {categories.map((category) => (
               <option key={category._id} value={category._id}>
                 {category.name}
@@ -216,19 +240,23 @@ const EditBook = () => {
           </Select>
         </div>
 
-        {/* Image URL */}
+        {/* Image */}
         <div className="col-span-2">
           <div className="mb-2 block">
-            <Label htmlFor="image" value="Image URL" />
+            <Label htmlFor="image" value="Image" />
           </div>
-          <TextInput
+          <div className="mb-4">
+            <img
+              src={imagePreview}
+              alt="Current Book Cover"
+              className="w-40 h-auto"
+            />
+          </div>
+          <FileInput
             id="image"
             name="image"
-            type="text"
-            placeholder="URL"
-            className="w-full"
-            required
-            defaultValue={currentBook.image}
+            type="file"
+            onChange={handleImageChange}
           />
         </div>
 
