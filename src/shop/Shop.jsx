@@ -17,7 +17,7 @@ const Shop = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:3000/book/get-all")
+    fetch("http://localhost:3000/book/get-all-active")
       .then((res) => res.json())
       .then((data) => setBooks(data));
 

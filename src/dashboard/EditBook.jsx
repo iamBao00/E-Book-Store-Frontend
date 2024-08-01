@@ -6,6 +6,7 @@ import {
   Textarea,
   Select,
   FileInput,
+  Checkbox,
 } from "flowbite-react";
 import { useLoaderData, useParams } from "react-router-dom";
 
@@ -17,6 +18,7 @@ const EditBook = () => {
   const [selectedCategory, setCategory] = useState("");
   const [newImage, setNewImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(book.image);
+  const [isActive, setIsActive] = useState(book.is_active);
 
   useEffect(() => {
     // Fetch all categories
@@ -48,6 +50,18 @@ const EditBook = () => {
     };
     if (file) {
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (name === "is_active") {
+      setIsActive(checked);
+    } else {
+      setCurrentBook({
+        ...currentBook,
+        [name]: type === "checkbox" ? checked : value,
+      });
     }
   };
 
@@ -89,9 +103,12 @@ const EditBook = () => {
       publisher,
       description,
       stock_quantity,
-      category_id,
       image: imageUrl,
+      is_active: isActive,
     };
+    if (category_id !== "") bookObj.category_id = category_id;
+    console.log("bookObj");
+    console.log(bookObj);
 
     try {
       const response = await fetch(
@@ -105,10 +122,14 @@ const EditBook = () => {
         }
       );
       const data = await response.json();
-      console.log("Book updated successfully!");
-      console.log(data);
-      alert("Book updated successfully!");
-      setCurrentBook(data);
+      if (response.ok) {
+        console.log("Book updated successfully!");
+        console.log(data);
+        alert("Book updated successfully!");
+        setCurrentBook(data);
+      } else {
+        alert(data.msg);
+      }
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
       alert("There was a problem with the update: " + error.message);
@@ -116,120 +137,112 @@ const EditBook = () => {
   };
 
   return (
-    <div className="px-4 my-12">
-      <h2 className="mb-8 text-3xl font-bold">EDIT Book</h2>
+    <div className="px-4 py-8 max-w-4xl mx-auto bg-white shadow-md rounded-lg">
+      <h2 className="mb-8 text-3xl font-bold text-center">Edit Book</h2>
       <form
         onSubmit={handleBookSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full"
       >
         {/* Book title */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="title" value="Book Title" />
-          </div>
+          <Label htmlFor="title" value="Book Title" />
           <TextInput
             id="title"
             name="title"
             type="text"
             placeholder="Book name"
-            className="w-full"
+            className="w-full mt-1"
             required
-            defaultValue={currentBook.title}
+            value={currentBook.title}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Author's name */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="author" value="Author's Name" />
-          </div>
+          <Label htmlFor="author" value="Author's Name" />
           <TextInput
             id="author"
             name="author"
             type="text"
             placeholder="Author's name"
-            className="w-full"
+            className="w-full mt-1"
             required
-            defaultValue={currentBook.author}
+            value={currentBook.author}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Price */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="price" value="Price" />
-          </div>
+          <Label htmlFor="price" value="Price" />
           <TextInput
             id="price"
             name="price"
-            type="number"
+            type="text"
             placeholder="Price"
-            className="w-full"
+            pattern="^\d+(\.\d{1,2})?$"
+            className="w-full mt-1"
             required
-            defaultValue={currentBook.price}
+            value={currentBook.price}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Publisher */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="publisher" value="Publisher" />
-          </div>
+          <Label htmlFor="publisher" value="Publisher" />
           <TextInput
             id="publisher"
             name="publisher"
             type="text"
             placeholder="Publisher"
-            className="w-full"
+            className="w-full mt-1"
             required
-            defaultValue={currentBook.publisher}
+            value={currentBook.publisher}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Description */}
-        <div className="col-span-2">
-          <div className="mb-2 block">
-            <Label htmlFor="description" value="Description" />
-          </div>
+        <div className="lg:col-span-2">
+          <Label htmlFor="description" value="Description" />
           <Textarea
             id="description"
             name="description"
             placeholder="Description"
-            className="w-full"
+            className="w-full mt-1"
             rows={4}
             required
-            defaultValue={currentBook.description}
+            value={currentBook.description}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Quantity */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="stock_quantity" value="Quantity" />
-          </div>
+          <Label htmlFor="stock_quantity" value="Quantity" />
           <TextInput
             id="stock_quantity"
             name="stock_quantity"
             type="number"
             placeholder="Quantity"
-            className="w-full"
+            className="w-full mt-1"
             required
-            defaultValue={currentBook.stock_quantity}
+            value={currentBook.stock_quantity}
+            onChange={handleInputChange}
           />
         </div>
 
         {/* Category */}
         <div>
-          <div className="mb-2 block">
-            <Label htmlFor="inputState" value="Book Category" />
-          </div>
+          <Label htmlFor="inputState" value="Book Category" />
           <Select
             id="inputState"
             name="category_id"
-            className="w-full rounded"
+            className="w-full mt-1"
             value={selectedCategory}
             onChange={handleChangeSelectedValue}
-            required
           >
             <option value="">Select a category</option>
             {categories.map((category) => (
@@ -241,15 +254,13 @@ const EditBook = () => {
         </div>
 
         {/* Image */}
-        <div className="col-span-2">
-          <div className="mb-2 block">
-            <Label htmlFor="image" value="Image" />
-          </div>
-          <div className="mb-4">
+        <div className="lg:col-span-2">
+          <Label htmlFor="image" value="Image" />
+          <div className="mt-1 mb-4">
             <img
               src={imagePreview}
               alt="Current Book Cover"
-              className="w-40 h-auto"
+              className="w-40 h-auto rounded-lg"
             />
           </div>
           <FileInput
@@ -258,6 +269,17 @@ const EditBook = () => {
             type="file"
             onChange={handleImageChange}
           />
+        </div>
+
+        {/* Active */}
+        <div className="flex items-center">
+          <Checkbox
+            id="is_active"
+            name="is_active"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+          />
+          <Label htmlFor="is_active" value="Active" className="ml-2" />
         </div>
 
         {/* Submit Button */}

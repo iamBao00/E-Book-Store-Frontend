@@ -11,6 +11,7 @@ const PaymentPage = () => {
     postal_code: "",
     street: "",
   });
+  const [phoneNumber, setPhoneNumber] = useState(""); // Separate phone number state
   const [paymentMethod, setPaymentMethod] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [books, setBooks] = useState({});
@@ -21,7 +22,22 @@ const PaymentPage = () => {
   useEffect(() => {
     fetchAddresses();
     fetchCartItems();
+    fetchPhoneNumber();
   }, []);
+
+  useEffect(() => {
+    if (selectedAddress) {
+      const address = addresses.find((addr) => addr._id === selectedAddress);
+      if (address) {
+        setNewAddress({
+          country: address.country,
+          city: address.city,
+          postal_code: address.postal_code,
+          street: address.street,
+        });
+      }
+    }
+  }, [selectedAddress]);
 
   const fetchAddresses = async () => {
     try {
@@ -35,6 +51,27 @@ const PaymentPage = () => {
       const data = await response.json();
       if (response.ok) {
         setAddresses(data);
+      } else {
+        console.error("Failed to fetch addresses:", data.message);
+      }
+    } catch (err) {
+      console.error("Failed to fetch addresses:", err);
+    }
+  };
+
+  const fetchPhoneNumber = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/get-phone", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        setPhoneNumber(data.phoneNumber);
       } else {
         console.error("Failed to fetch addresses:", data.message);
       }
@@ -92,12 +129,13 @@ const PaymentPage = () => {
   };
 
   const handlePlaceOrder = async () => {
-    if (!paymentMethod || (!selectedAddress && !isNewAddressValid())) {
-      alert("Please select a payment method and address.");
+    if (!paymentMethod || !isNewAddressValid() || !phoneNumber) {
+      alert(
+        "Please select a payment method, enter a valid address, and provide a phone number."
+      );
       return;
     }
 
-    const addressToSend = selectedAddress || newAddress;
     try {
       const response = await fetch("http://localhost:3000/order/place-order", {
         method: "POST",
@@ -105,7 +143,11 @@ const PaymentPage = () => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ paymentMethod, address: addressToSend }),
+        body: JSON.stringify({
+          paymentMethod,
+          address: newAddress,
+          phoneNumber,
+        }), // Send phoneNumber separately
       });
 
       const responseData = await response.json();
@@ -130,7 +172,8 @@ const PaymentPage = () => {
       newAddress.country &&
       newAddress.city &&
       newAddress.postal_code &&
-      newAddress.street
+      newAddress.street &&
+      phoneNumber // Ensure phone number is also valid
     );
   };
 
@@ -188,7 +231,7 @@ const PaymentPage = () => {
           <p>No addresses found. Please enter a new address.</p>
         )}
         <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-2">Enter New Address</h2>
+          <h2 className="text-xl font-semibold mb-2">Address</h2>
           <input
             type="text"
             placeholder="Country"
@@ -226,6 +269,15 @@ const PaymentPage = () => {
             onChange={(e) =>
               setNewAddress({ ...newAddress, street: e.target.value })
             }
+            required
+            className="w-full p-2 border border-gray-300 rounded-md mb-2"
+          />
+          <h2 className="text-xl font-semibold mb-2">Phone Number</h2>
+          <input
+            type="text"
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)} // Update phone number state
             required
             className="w-full p-2 border border-gray-300 rounded-md"
           />
@@ -293,17 +345,19 @@ const PaymentPage = () => {
         <h2 className="text-xl font-semibold mb-2">Total Amount</h2>
         <p className="text-2xl font-bold">${totalAmount.toFixed(2)}</p>
       </div>
-      {!selectedAddress && !isNewAddressValid() && (
-        <p className="text-red-500">
-          Please select a valid address before place an order.
-        </p>
-      )}
+      {!isNewAddressValid() ||
+        (!phoneNumber && (
+          <p className="text-red-500">
+            Please enter a valid address and phone number before placing an
+            order.
+          </p>
+        ))}
       {sdkReady && paymentMethod === "paypal" && (
         <PayPalButton
           amount={totalAmount}
           onSuccess={(details, data) => handlePlaceOrder(details, data)}
           onError={() => {
-            alert("Error happen while processing payment with Paypal");
+            alert("Error occurred while processing payment with PayPal.");
           }}
         />
       )}

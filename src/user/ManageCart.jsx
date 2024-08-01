@@ -179,7 +179,7 @@ const ManageCart = () => {
                           </div>
                         </>
                       ) : (
-                        <span>Loading book details...</span>
+                        <span>This book has been removed...</span>
                       )}
                     </div>
                   </div>

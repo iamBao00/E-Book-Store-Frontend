@@ -1,13 +1,63 @@
-import React from "react";
+import React, { useState } from "react";
 
 const SignUp = () => {
+  const [error, setError] = useState(""); // State để lưu thông báo lỗi
+  const [success, setSuccess] = useState(""); // State để lưu thông báo thành công
+
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+    const form = event.target;
+
+    const username = form.username.value;
+    const email = form.email.value;
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (response.ok) {
+        setSuccess("Registration successful! Redirecting to login...");
+        setTimeout(() => {
+          window.location.href = "/login"; // Redirect to login page after success
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Registration failed", err);
+      setError("Failed to register. Please try again.");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center  w-full bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center w-full bg-gray-100 dark:bg-gray-900">
       <div className="w-full max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md px-8 py-10 flex flex-col items-center">
         <h1 className="text-xl font-bold text-center text-gray-700 dark:text-gray-200 mb-8">
           Register
         </h1>
-        <form action="#" className="w-full flex flex-col gap-4">
+        <form
+          onSubmit={handleFormSubmit}
+          className="w-full flex flex-col gap-4"
+        >
+          {error && (
+            <div className="mb-4 text-red-500 text-center">{error}</div>
+          )}
+          {success && (
+            <div className="mb-4 text-green-500 text-center">{success}</div>
+          )}
           <div className="flex items-start flex-col justify-start">
             <label
               htmlFor="username"
@@ -20,6 +70,7 @@ const SignUp = () => {
               id="username"
               name="username"
               className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
             />
           </div>
 
@@ -35,6 +86,7 @@ const SignUp = () => {
               id="email"
               name="email"
               className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
             />
           </div>
 
@@ -50,6 +102,7 @@ const SignUp = () => {
               id="password"
               name="password"
               className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
             />
           </div>
 
@@ -65,6 +118,7 @@ const SignUp = () => {
               id="confirmPassword"
               name="confirmPassword"
               className="w-full px-3 dark:text-gray-200 dark:bg-gray-900 py-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
             />
           </div>
 

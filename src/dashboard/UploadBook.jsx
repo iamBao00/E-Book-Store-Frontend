@@ -93,7 +93,7 @@ const UploadBook = () => {
 
   return (
     <div className="px-4 my-12">
-      <h2 className="mb-8 text-3xl font-bold"> Upload a Book</h2>
+      <h2 className=" mb-8 text-3xl font-bold"> Upload a Book</h2>
       <form
         onSubmit={handleBookSubmit}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full"
@@ -200,7 +200,6 @@ const UploadBook = () => {
             className="w-full rounded"
             value={selectedCategory}
             onChange={handleChangeSelectedValue}
-            required
           >
             <option value=""></option>
             {categories.map((category) => (

@@ -12,6 +12,7 @@ import ManageBook from "../dashboard/ManageBook";
 import EditBook from "../dashboard/EditBook";
 import SignUp from "../components/SignUp";
 import SignIn from "../components/SignIn";
+import ForgotPassword from "../components/ForgotPassword";
 import { User } from "../user/User";
 import PrivateRoute from "../dashboard/PrivateRoute";
 import ManageCart from "../user/ManageCart";
@@ -19,6 +20,7 @@ import PaymentPage from "../user/PaymentPage";
 import OrderHistory from "../user/OrderHistory";
 import ManageOrder from "../dashboard/ManageOrder";
 import UserInfo from "../user/UserInfo";
+import ResetPassword from "../components/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -90,6 +92,14 @@ const router = createBrowserRouter([
     element: <SignIn />,
   },
   {
+    path: "/forgot",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password/:token",
+    element: <ResetPassword />,
+  },
+  {
     path: "/user",
     element: <User />,
     children: [
@@ -104,14 +114,6 @@ const router = createBrowserRouter([
       {
         path: "/user/info/:id",
         element: <UserInfo />,
-        // loader: ({ params }) =>
-        //   fetch(`http://localhost:3000/users/info/${params.id}`, {
-        //     method: "GET",
-        //     headers: {
-        //       "Content-type": "application/json",
-        //     },
-        //     credentials: "include",
-        //   }),
       },
     ],
   },

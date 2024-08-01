@@ -34,7 +34,8 @@ const OrderHistory = () => {
       console.log(data); // Debugging: Check the fetched data
       setOrders(data);
     } catch (err) {
-      setError(err.message);
+      // setError(err.message);
+      console.log(err.message);
     }
   };
   // Handle order cancellation
