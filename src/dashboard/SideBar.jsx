@@ -7,6 +7,7 @@ import {
   HiShoppingBag,
   HiTable,
   HiUser,
+  HiChartSquareBar,
 } from "react-icons/hi";
 import userImg from "../assets/profile.jpg";
 
@@ -73,6 +74,12 @@ const SideBar = () => {
           </Sidebar.Item>
           <Sidebar.Item href="/admin/dashboard/order" icon={HiShoppingBag}>
             Manage Order
+          </Sidebar.Item>
+          <Sidebar.Item
+            href="/admin/dashboard/statistics"
+            icon={HiChartSquareBar}
+          >
+            Statistics
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiTable} onClick={handleLogout}>
             Log out

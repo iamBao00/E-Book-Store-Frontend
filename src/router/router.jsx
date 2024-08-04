@@ -21,6 +21,7 @@ import OrderHistory from "../user/OrderHistory";
 import ManageOrder from "../dashboard/ManageOrder";
 import UserInfo from "../user/UserInfo";
 import ResetPassword from "../components/ResetPassword";
+import Statistics from "../dashboard/Statistics";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: "/admin/dashboard/order",
         element: <ManageOrder />,
+      },
+      {
+        path: "/admin/dashboard/statistics",
+        element: <Statistics />,
       },
     ],
   },
