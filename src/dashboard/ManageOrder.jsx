@@ -249,16 +249,22 @@ const ManageOrder = () => {
             <ul>
               {selectedOrder.orderDetails.map((detail) => (
                 <li key={detail._id} className="mb-2 flex items-center">
-                  <img
-                    src={detail.book_id.image}
-                    alt={detail.book_id.title}
-                    className="w-16 h-16 mr-4"
-                  />
-                  <div>
-                    <p className="font-semibold">{detail.book_id.title}</p>
-                    <p>Author: {detail.book_id.author}</p>
-                    <p>Quantity: {detail.quantity}</p>
-                  </div>
+                  {detail.book_id ? (
+                    <>
+                      <img
+                        src={detail.book_id.image}
+                        alt={detail.book_id.title}
+                        className="w-16 h-16 mr-4"
+                      />
+                      <div>
+                        <p className="font-semibold">{detail.book_id.title}</p>
+                        <p>Author: {detail.book_id.author}</p>
+                        <p>Quantity: {detail.quantity}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-red-500">This book has been deleted</p>
+                  )}
                 </li>
               ))}
             </ul>
