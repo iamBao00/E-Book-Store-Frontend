@@ -132,28 +132,36 @@ const SingleBook = () => {
     setQuantity(parseInt(e.target.value, 10));
   };
 
-  const handleConfirmAddToCart = () => {
-    fetch("http://localhost:3000/users/add-to-cart", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        bookId: book._id,
-        quantity: quantity,
-      }),
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then(() => {
-        setShowPopup(false);
-        setQuantity(1);
-        toast.success("Book added to cart successfully!"); // Show success message
-      })
-      .catch((error) => {
-        console.error("Error adding to cart:", error);
-        toast.error("Failed to add book to cart."); // Show error message
+  const handleConfirmAddToCart = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/add-to-cart", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookId: book._id,
+          quantity: quantity,
+        }),
+        credentials: "include",
       });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          navigate("/login", { state: { error: "You need to login first" } });
+          return;
+        }
+        throw new Error("Failed to add book to cart.");
+      }
+
+      const data = await response.json();
+      setShowPopup(false);
+      setQuantity(1);
+      toast.success("Book added to cart successfully!"); // Show success message
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add book to cart."); // Show error message
+    }
   };
 
   const handleClosePopup = () => {
@@ -303,6 +311,7 @@ const SingleBook = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

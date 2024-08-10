@@ -80,15 +80,23 @@ const Shop = () => {
       }),
       credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 401) {
+          navigate("/login");
+          throw new Error("Unauthorized");
+        }
+        return res.json();
+      })
       .then(() => {
         setShowPopup(false);
         setQuantity(1);
-        toast.success("Book added to cart successfully!"); // Show success message
+        toast.success("Book added to cart successfully!");
       })
       .catch((error) => {
-        console.error("Error adding to cart:", error);
-        toast.error("Failed to add book to cart."); // Show error message
+        if (error.message !== "Unauthorized") {
+          console.error("Error adding to cart:", error);
+          toast.error("Failed to add book to cart.");
+        }
       });
   };
 

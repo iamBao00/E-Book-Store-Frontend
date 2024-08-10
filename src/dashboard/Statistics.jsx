@@ -18,9 +18,8 @@ const Statistics = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
-  const [selectedMonth, setSelectedMonth] = useState(
-    moment().startOf("month").utc()
-  );
+  const [selectedMonth, setSelectedMonth] = useState(moment().startOf("month"));
+  const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
 
   useEffect(() => {
     fetchOrders();
@@ -44,55 +43,106 @@ const Statistics = () => {
       }
 
       const data = await response.json();
-      setOrders(data);
-      setFilteredOrders(data);
-      calculateTotalRevenue(data);
+      // Convert createdAt to string format for consistent comparison
+      const ordersWithStringDates = data.map((order) => ({
+        ...order,
+        createdAt: moment.utc(order.createdAt).format("YYYY-MM-DD"),
+        updatedAt: moment.utc(order.updatedAt).format("YYYY-MM-DD"),
+      }));
+
+      setOrders(ordersWithStringDates);
+      updateFilteredOrders(ordersWithStringDates, selectedDateRange);
+      calculateTotalRevenue(ordersWithStringDates, selectedDateRange);
     } catch (err) {
       console.log(err.message);
     }
   };
 
-  const calculateTotalRevenue = (orders) => {
-    const total = orders.reduce((sum, order) => sum + order.amount, 0);
+  const updateFilteredOrders = (orders, dateRange) => {
+    if (!dateRange[0] || !dateRange[1]) {
+      setFilteredOrders(orders);
+    } else {
+      const [start, end] = dateRange.map((date) =>
+        moment.utc(date).format("YYYY-MM-DD")
+      );
+      const filtered = orders.filter((order) => {
+        const orderDate = order.createdAt;
+        return orderDate >= start && orderDate <= end;
+      });
+
+      setFilteredOrders(filtered);
+    }
+  };
+
+  const calculateTotalRevenue = (orders, dateRange) => {
+    let filteredOrders = orders;
+
+    if (dateRange[0] && dateRange[1]) {
+      const [start, end] = dateRange.map((date) =>
+        moment.utc(date).format("YYYY-MM-DD")
+      );
+      filteredOrders = orders.filter((order) => {
+        const orderDate = order.createdAt;
+        return orderDate >= start && orderDate <= end;
+      });
+    }
+
+    const total = filteredOrders.reduce((sum, order) => sum + order.amount, 0);
     setTotalRevenue(total);
   };
 
   const handleDateChange = (dates) => {
     if (!dates || dates.length === 0) {
-      setFilteredOrders(orders);
-      calculateTotalRevenue(orders);
+      setSelectedDateRange([null, null]);
+      updateFilteredOrders(orders, [null, null]);
+      calculateTotalRevenue(orders, [null, null]);
       return;
     }
 
     const [start, end] = dates;
-    const filtered = orders.filter((order) => {
-      const orderDate = moment.utc(order.createdAt);
-      return orderDate.isBetween(start, end, null, "[]");
-    });
+    const formattedDates = [
+      start.format("YYYY-MM-DD"),
+      end.format("YYYY-MM-DD"),
+    ];
 
-    setFilteredOrders(filtered);
-    calculateTotalRevenue(filtered);
+    setSelectedDateRange(formattedDates);
+    updateFilteredOrders(orders, formattedDates);
+    calculateTotalRevenue(orders, formattedDates);
   };
 
   const handleMonthChange = (date) => {
-    setSelectedMonth(
-      date
-        ? date.clone().startOf("month").utc()
-        : moment().startOf("month").utc()
-    );
+    if (date) {
+      const startOfMonth = date.startOf("month").format("YYYY-MM-DD");
+      const endOfMonth = date.endOf("month").format("YYYY-MM-DD");
+
+      setSelectedMonth(date);
+      setSelectedDateRange([startOfMonth, endOfMonth]); // Set date range for the chart
+      updateFilteredOrders(orders, [startOfMonth, endOfMonth]); // Update data for table
+      calculateTotalRevenue(orders, [startOfMonth, endOfMonth]); // Calculate revenue for date range
+    } else {
+      const startOfMonth = moment().startOf("month").format("YYYY-MM-DD");
+      const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
+
+      setSelectedMonth(moment().startOf("month"));
+      setSelectedDateRange([startOfMonth, endOfMonth]); // Reset date range for the chart
+      updateFilteredOrders(orders, [startOfMonth, endOfMonth]); // Show all data in table
+      calculateTotalRevenue(orders, [startOfMonth, endOfMonth]); // Calculate total revenue for all data
+    }
   };
 
   const generateChartData = () => {
-    const daysInMonth = selectedMonth.daysInMonth();
+    const startDate = selectedMonth
+      .clone()
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    const endDate = selectedMonth.clone().endOf("month").format("YYYY-MM-DD");
+    const daysInRange = moment(endDate).diff(moment(startDate), "days") + 1;
     const chartData = [];
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      const date = selectedMonth.clone().date(i).startOf("day").utc(); // Ensure date is in UTC
+    for (let i = 0; i < daysInRange; i++) {
+      const date = moment(startDate).add(i, "days").format("YYYY-MM-DD");
 
-      const dailyOrders = orders.filter((order) => {
-        const orderDate = moment.utc(order.createdAt).startOf("day");
-        return orderDate.isSame(date, "day");
-      });
+      const dailyOrders = orders.filter((order) => order.createdAt === date);
 
       const dailyRevenue = dailyOrders.reduce(
         (sum, order) => sum + order.amount,
@@ -100,7 +150,7 @@ const Statistics = () => {
       );
 
       chartData.push({
-        date: date.format("YYYY-MM-DD"),
+        date: date,
         orders: dailyOrders.length,
         revenue: dailyRevenue,
       });
@@ -130,13 +180,13 @@ const Statistics = () => {
       title: "Date Ordered",
       dataIndex: "createdAt",
       key: "dateOrdered",
-      render: (createdAt) => moment.utc(createdAt).format("YYYY-MM-DD"),
+      render: (createdAt) => moment(createdAt).format("YYYY-MM-DD"),
     },
     {
       title: "Date Completed",
       dataIndex: "updatedAt",
       key: "dateCompleted",
-      render: (updatedAt) => moment.utc(updatedAt).format("YYYY-MM-DD"),
+      render: (updatedAt) => moment(updatedAt).format("YYYY-MM-DD"),
     },
     {
       title: "Payment Method",

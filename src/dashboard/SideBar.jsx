@@ -10,10 +10,11 @@ import {
   HiChartSquareBar,
 } from "react-icons/hi";
 import userImg from "../assets/profile.jpg";
+import { Link } from "react-router-dom";
 
 const SideBar = () => {
   const [user, setUser] = useState(null);
-
+  console.log(user);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -70,7 +71,7 @@ const SideBar = () => {
             Magane Category
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={HiUser}>
-            Infomation
+            <Link to={`/admin/dashboard/info/${user?._id}`}>Infomation</Link>
           </Sidebar.Item>
           <Sidebar.Item href="/admin/dashboard/order" icon={HiShoppingBag}>
             Manage Order

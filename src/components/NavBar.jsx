@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 //react icon
 import { FaBarsStaggered, FaBlog, FaXmark } from "react-icons/fa6";
@@ -35,7 +37,10 @@ const NavBar = () => {
     { link: "Shop", path: "/shop" },
     // { link: "Blog", path: "/blog" },
     { link: "Sign-in", path: "/login" },
-    { link: "My-Info", path: "/user" },
+    {
+      link: <FontAwesomeIcon icon={faUser} />,
+      path: "/user",
+    },
   ];
   return (
     <header className="w-full bg-transparent fixed top-0 left-0 right-0 transition-all ease-in duration-300">
